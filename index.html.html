@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Torre Quente Tripla</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap">
+<style>
+/* VOICE trabalho técnico: prancha de marcenaria para validar antes de cortar
+   IDEA a prancha do projetista: vista frontal, corte lateral, cotas encadeadas, carimbo e quadro de cotas
+   PICTURE a torre em escala com a pessoa de 1,55 m ao lado, régua colorida de zonas e linhas de olhos/cotovelo
+   COLOUR papel branco e grafite; laranja = seleção, azul = ergonomia, verde/âmbar = zonas, magenta = elétrica
+   TYPE IBM Plex Sans para texto, IBM Plex Sans Condensed para cotas
+   LAYOUT laptop: faixa-carimbo no topo, desenho à esquerda e inspetor à direita; celular: desenho, controles, inspetor */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0f1215);--paper:light-dark(#ffffff,#13171b);--ink:light-dark(#15181c,#e8eaed);--mut:light-dark(#59606a,#9ea6af);--line:light-dark(#dde1e5,#2a3037);--grid:light-dark(#eef1f3,#1b2026);--panel:light-dark(#f4f5f7,#181c21);--dim:light-dark(#2d333a,#c8cdd3);--ergo:light-dark(#2350c2,#86abff);--fig:light-dark(#cfd9f2,#2a395e);--sel:light-dark(#e2530c,#ff8c50);--ok:light-dark(#1a7741,#58c886);--warn:light-dark(#a35f00,#f3b450);--bad:light-dark(#b3261e,#ff7b72);--elec:light-dark(#8c27a4,#e28cf2);--band:#1d2227;--sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--cond:"IBM Plex Sans Condensed","Arial Narrow","Roboto Condensed",var(--sans)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);overflow-x:clip}
+button,input{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.1;letter-spacing:-.01em}
+.band{padding-left:max(4vw,16px);padding-right:max(4vw,16px)}
+.hd{background:var(--band);color:#f3f4f6;padding-block:22px 20px}
+.hd-in{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr);gap:20px 40px;align-items:end}
+.hd h1{font-size:clamp(28px,3.4vw,42px);font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.hd p{margin:8px 0 0;color:#c9ced4;max-width:60ch}
+.hd p b{color:#fff}
+.kf{display:grid;grid-template-columns:repeat(auto-fit,minmax(7em,1fr));gap:0;margin:0;border:1px solid #3a4148}
+.kf div{padding:10px 12px;border-right:1px solid #3a4148}
+.kf div:last-child{border-right:0}
+.kf dt{font-size:13px;color:#aab2bb}
+.kf dd{margin:2px 0 0;font:600 19px/1.15 var(--cond);white-space:nowrap}
+.kf dd small{font-size:13px;font-weight:500;color:#aab2bb}
+.work{max-width:1400px;margin:0 auto;padding:18px max(4vw,16px) 8px;display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-areas:"tools tools" "draw side";gap:16px 22px;align-items:start}
+.tools{grid-area:tools;display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.grp{display:flex;flex-direction:column;gap:5px}
+.grp>span{font-size:13px;color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:0 12px;min-height:40px;cursor:pointer;font-size:14px;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);font-weight:600}
+.sw{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:0 11px 0 7px;min-height:40px;cursor:pointer;font-size:14px;white-space:nowrap}
+.sw i{width:24px;height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.25);display:block}
+.sw[aria-pressed=true]{border-color:var(--sel);box-shadow:inset 0 0 0 1px var(--sel);font-weight:600}
+.tg{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:0 11px;min-height:40px;cursor:pointer;font-size:14px;white-space:nowrap;user-select:none}
+.tg input{width:17px;height:17px;accent-color:var(--sel);margin:0}
+.btn{border:0;background:var(--sel);color:#fff;font-weight:600;border-radius:8px;padding:0 16px;min-height:42px;cursor:pointer;font-size:15px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,.tg:focus-within{outline:2px solid var(--sel);outline-offset:2px}
+.draw{grid-area:draw}
+.sheet{border:1px solid var(--line);background:var(--paper);overflow-x:auto;border-radius:6px}
+.sheet svg{display:block;margin:0 auto;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px)}
+.cap{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);padding:9px 2px 0}
+.cap span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.cap i{width:14px;height:10px;display:inline-block;border-radius:2px}
+.alert{margin-top:12px;border-left:4px solid var(--warn);background:color-mix(in srgb,var(--warn) 11%,var(--paper));padding:10px 14px;border-radius:0 6px 6px 0;font-size:15px}
+.alert:empty{display:none}
+.alert b{color:var(--warn)}
+.side{grid-area:side;display:flex;flex-direction:column;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:0 11px;min-height:34px;font-size:13px;cursor:pointer;white-space:nowrap}
+.chips button[aria-pressed=true]{background:var(--sel);border-color:var(--sel);color:#fff;font-weight:600}
+.card{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px 16px}
+.insp h2{font-size:21px}
+.insp .rng{font:600 24px/1.2 var(--cond);margin:6px 0 10px;white-space:nowrap}
+.insp .rng small{font:500 14px var(--sans);color:var(--mut)}
+.insp dl{display:grid;grid-template-columns:minmax(0,1fr) auto;margin:0 0 6px;font-size:14px}
+.insp dt,.insp dd{padding:5px 0;border-top:1px solid var(--line);margin:0}
+.insp dd{text-align:right;font:500 15px var(--cond);padding-left:12px}
+.insp h3{font-size:14px;margin:12px 0 3px}
+.insp p{margin:0;font-size:14.5px;line-height:1.5}
+.insp .el{border-left:3px solid var(--elec);padding-left:10px}
+.insp .pv{font-size:13px;color:var(--mut);margin-top:10px}
+.checks{list-style:none;margin:8px 0 0;padding:0}
+.checks li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer}
+.checks li:hover b{text-decoration:underline}
+.checks .p{grid-row:span 2;font:600 12.5px var(--sans);padding:2px 8px;border-radius:4px;height:max-content;white-space:nowrap;color:#fff}
+.p.ok{background:var(--ok)}.p.warn{background:var(--warn)}.p.bad{background:var(--bad)}.p.info{background:var(--mut)}
+:root:not([data-theme=light]) .p{color:light-dark(#fff,#0f1215)}
+.checks b{font-size:14.5px}
+.checks span.x{font-size:13.5px;color:var(--mut);line-height:1.45}
+.card h2{font-size:17px}
+.sum{font-size:14px;color:var(--mut);margin:4px 0 0}
+.adj{display:grid;gap:12px}
+.adj label{font-size:13px;color:var(--mut);display:block;margin-bottom:4px}
+.adj input[type=number]{width:7.5em;min-height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:16px}
+.low{max-width:1400px;margin:0 auto;padding-block:22px 48px}
+.low h2{font-size:24px;margin-bottom:4px}
+.low .lead{color:var(--mut);margin:0 0 12px;max-width:80ch;font-size:15px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:34px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--mut);font-weight:600;border-bottom:1.5px solid var(--ink)}
+td.n,th.n{text-align:right;font-family:var(--cond);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nom{color:var(--mut)}
+.diff{color:var(--sel);font-weight:600}
+svg text{font-family:var(--cond)}
+svg .ct{font-size:13px;fill:var(--dim);paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+svg .ct.sm{font-size:12px}
+svg .cl{stroke:var(--dim);stroke-width:1;fill:none}
+svg .ex{stroke:var(--dim);stroke-width:.6;opacity:.5}
+svg .fz .cl{stroke:var(--ok)}
+svg .fz .ct{fill:var(--ok)}
+svg .vt{font:600 14px var(--sans);fill:var(--ink)}
+svg .lv{font-size:12.5px;fill:var(--mut);paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+svg .mv{fill:none;stroke:var(--mut);stroke-dasharray:5 4;stroke-width:1.1;pointer-events:none}
+svg .mvt{font-size:12px;fill:var(--mut);paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+svg .eb{fill:var(--paper);stroke:var(--elec);stroke-width:1.6}
+svg .et{fill:var(--elec);font-size:12.5px;font-weight:600;paint-order:stroke;stroke:var(--paper);stroke-width:3px}
+svg .air{fill:none;stroke:var(--warn);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+svg .eg{stroke:var(--ergo);stroke-width:1.3;stroke-dasharray:8 4;pointer-events:none}
+svg .eg.es{stroke-dasharray:2 4;opacity:.75}
+svg .egt{fill:var(--ergo);font-size:13px;font-weight:600;paint-order:stroke;stroke:var(--paper);stroke-width:3.5px}
+svg .egt.es{font-weight:500;opacity:.85}
+svg .pf{fill:var(--fig);stroke:var(--ergo);stroke-width:1}
+svg .rl{font:600 12px var(--sans)}
+svg .ov{pointer-events:none}
+.hit{cursor:pointer}
+.hit .hl{fill:transparent;stroke:transparent}
+.hit:hover .hl{fill:color-mix(in srgb,var(--sel) 12%,transparent);stroke:var(--sel);stroke-width:1.5}
+.hit.sel .hl{fill:color-mix(in srgb,var(--sel) 16%,transparent);stroke:var(--sel);stroke-width:2.6}
+.hit:focus{outline:none}
+.hit:focus-visible .hl{stroke:var(--sel);stroke-width:3;stroke-dasharray:5 3}
+#ficha{display:none}
+body.printing .app{display:none}
+body.printing #ficha{display:block}
+.fbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px max(4vw,16px);background:var(--band);color:#eef0f2;position:sticky;top:0;z-index:2}
+.fbar p{margin:0;font-size:14px;color:#c9ced4;flex:1 1 260px}
+.fbar .btn.ghost{color:#eef0f2;border-color:#4a525a}
+.pg{max-width:1000px;margin:20px auto;background:#fff;color:#111;padding:28px 32px;border:1px solid #d6d9dd;--paper:#fff;--ink:#111;--dim:#222;--mut:#555;--line:#cfd3d8;--grid:#f1f3f5;--ergo:#2350c2;--fig:#d6e0f5;--sel:#e2530c;--ok:#1a7741;--warn:#a35f00;--bad:#b3261e;--elec:#8c27a4;color-scheme:light}
+.pg h1{font-size:26px}
+.pg h2{font-size:17px;margin:20px 0 6px}
+.pg table{font-size:12.5px}
+.pg th,.pg td{padding:5px 7px}
+.tb{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;border:1.5px solid #111;margin:14px 0}
+.tb div{padding:6px 9px;border-right:1px solid #111;font-size:13px}
+.tb div:last-child{border-right:0}
+.tb label{display:block;font-size:11.5px;color:#555}
+.tb input{border:0;border-bottom:1px solid #999;width:100%;font-size:14px;padding:2px 0;background:transparent;color:#111}
+.fsvg .hit .hl{fill:transparent!important;stroke:transparent!important}
+.fsvg svg{width:100%;height:auto;max-height:155mm;display:block;background:#fff}
+.notes{font-size:12.5px;columns:2;column-gap:24px;padding-left:18px}
+.notes li{margin-bottom:4px;break-inside:avoid}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px;font-size:12px}
+.sig div{border-top:1px solid #111;padding-top:4px}
+.brk{break-before:page}
+.pg h2{break-after:avoid}
+.pg tr{break-inside:avoid}
+.ped{border-top:6px solid var(--band)}
+.pedf{display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:12px 16px;margin:14px 0 22px}
+.pedf label{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+.pedf input{width:100%;min-height:42px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);font-size:16px}
+.c2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;margin-top:26px}
+.c2 h3,.ped h3{font-size:18px;margin:0 0 8px}
+.ul{margin:0;padding-left:20px;font-size:15px}
+.ul li{margin-bottom:6px}
+.ck{list-style:none;padding-left:0}
+.ck li::before{content:"";display:inline-block;width:13px;height:13px;border:1.5px solid var(--ink);border-radius:2px;margin-right:9px;vertical-align:-1px}
+.msg{width:100%;min-height:190px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px 14px;font:15px/1.5 var(--sans);resize:vertical}
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.acts span{font-size:14px;color:var(--mut)}
+.tot{font-size:14px;color:var(--mut);margin:8px 0 0}
+@media(max-width:900px){.c2{grid-template-columns:minmax(0,1fr)}}
+.checks{columns:2;column-gap:28px}.checks li{break-inside:avoid}
+@media(max-width:1080px){.checks{columns:1}.work{grid-template-columns:minmax(0,1fr) 330px}}
+@media(max-width:900px){.work{grid-template-columns:minmax(0,1fr);grid-template-areas:"tools" "draw" "side"}.hd-in{grid-template-columns:minmax(0,1fr)}.cols{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.work{grid-template-areas:"draw" "tools" "side"}.tools{border-bottom:0;border-top:1px solid var(--line);padding-top:14px}table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0;text-align:right}.stack td::before{content:attr(data-l);color:var(--mut);text-align:left}.kf dd{font-size:17px}.pg{padding:16px}.tb{grid-template-columns:1fr 1fr}.notes{columns:1}}
+@media(prefers-reduced-motion:no-preference){.hit .hl{transition:fill .15s,stroke .15s}}
+@page{size:A4 portrait;margin:11mm}
+@media print{:root{color-scheme:light}.app,.fbar{display:none!important}#ficha{display:block!important}.pg{margin:0;border:0;padding:0;max-width:none}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="hd band">
+  <div class="hd-in">
+    <div>
+      <h1>Torre quente sob medida para 3 aparelhos</h1>
+      <p id="lede"></p>
+    </div>
+    <dl class="kf" id="kf"></dl>
+  </div>
+</header>
+
+<main class="work">
+  <section class="tools" aria-label="Controles do desenho">
+    <div class="grp"><span>Acabamento do MDF</span><div class="row" id="s-fin"></div></div>
+    <div class="grp"><span>Camadas</span>
+      <div class="row">
+        <label class="tg"><input type="checkbox" id="t-ergo">Ergonomia</label>
+        <label class="tg"><input type="checkbox" id="t-cotas">Cotas</label>
+        <label class="tg"><input type="checkbox" id="t-elec">Elétrica e ar</label>
+        <label class="tg"><input type="checkbox" id="t-side">Corte lateral</label>
+      </div>
+    </div>
+    <div class="grp"><span>Unidade</span><div class="seg" id="s-unit"><button data-v="cm">cm</button><button data-v="mm">mm</button></div></div>
+    <div class="grp"><span id="scl-l">Escala</span><div class="seg" id="s-scale"><button data-v="auto">Auto</button><button data-v="2">2,0</button><button data-v="2.5">2,5</button><button data-v="3">3,0</button></div></div>
+    <div class="grp"><span>Marceneiro</span><button class="btn" id="b-print">Pedido ao marceneiro</button></div>
+  </section>
+
+  <section class="draw" aria-label="Desenho técnico">
+    <div class="sheet" id="sheet"><div id="dw"></div></div>
+    <div class="cap" id="cap"></div>
+    <div class="alert" id="alert" role="status"></div>
+    <div class="card" style="margin-top:14px">
+      <h2>Validação do projeto</h2>
+      <p class="sum" id="sum"></p>
+      <ul class="checks" id="checks"></ul>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="chips" id="chips" aria-label="Módulos"></div>
+    <div class="card insp" id="insp" aria-live="polite"></div>
+    <div class="card adj">
+      <h2>Premissas da validação</h2>
+      <div><label>Fechamento da altura</label><div class="seg" id="s-fecho"><button data-v="240">Torre 240, armário cresce</button><button data-v="75">Armário 75</button></div></div>
+      <div><label>Vão livre do nicho da air fryer (Oster com 36,5 cm de altura)</label><div class="seg" id="s-n3"><button data-v="46.5">46,5 (10 livres)</button><button data-v="45">45 (8,5 livres)</button></div></div>
+      <div><label>Porta do armário superior</label><div class="seg" id="s-dob"><button data-v="d">Abre da esquerda p/ direita</button><button data-v="e">Abre da direita p/ esquerda</button></div></div>
+      <div><label>Tensão da instalação</label><div class="seg" id="s-volt"><button data-v="127">127 V</button><button data-v="220">220 V</button></div></div>
+      <div class="row" style="gap:16px">
+        <div><label for="in-pe">Pé-direito (cm)</label><input type="number" id="in-pe" min="200" max="400" step="1"></div>
+        
+      </div>
+    </div>
+  </aside>
+</main>
+
+<section class="band low">
+  <div class="cols">
+    <div>
+      <h2>Quadro de cotas para corte</h2>
+      <p class="lead" id="q-lead"></p>
+      <div class="scroll"><table class="stack" id="tq"></table></div>
+    </div>
+    <div>
+      <h2>Pontos elétricos</h2>
+      <p class="lead">Um circuito por aparelho, tomadas fora da traseira direta de cada um. Corrente calculada pela potência de placa; confirme com o eletricista (NBR 5410).</p>
+      <div class="scroll"><table class="stack" id="te"></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="band low ped" id="pedido">
+  <h2>Pedido ao marceneiro</h2>
+  <p class="lead">Preencha seus dados, confira a lista e envie a mensagem com o PDF do pedido em anexo. As medidas de corte estão em milímetros, como o marceneiro trabalha.</p>
+  <div class="pedf">
+    <div><label for="p-cli">Seu nome</label><input id="p-cli" autocomplete="name"></div>
+    <div><label for="p-tel">WhatsApp / telefone</label><input id="p-tel" inputmode="tel" autocomplete="tel"></div>
+    <div><label for="p-end">Endereço da obra</label><input id="p-end" autocomplete="street-address"></div>
+    <div><label for="p-prazo">Prazo desejado</label><input id="p-prazo" placeholder="ex.: até 20/12"></div>
+    <div><label for="p-mar">Marceneiro</label><input id="p-mar"></div>
+  </div>
+  <div class="c2">
+    <div><h3>Lista de peças (referência)</h3><div class="scroll"><table class="stack" id="tp"></table></div><p class="tot" id="tp-tot"></p></div>
+    <div><h3>Ferragens e materiais</h3><div class="scroll"><table class="stack" id="tf"></table></div></div>
+  </div>
+  <div class="c2">
+    <div><h3>O marceneiro precisa respeitar</h3><ul class="ul" id="rq"></ul></div>
+    <div><h3>Confirmar antes de cortar</h3><ul class="ul ck" id="cf"></ul><h3 style="margin-top:18px">Peço no orçamento</h3><ul class="ul ck" id="oc"></ul></div>
+  </div>
+  <div style="margin-top:26px;max-width:900px">
+    <h3><label for="msg">Mensagem para enviar</label></h3>
+    <textarea class="msg" id="msg" readonly></textarea>
+    <div class="acts"><button class="btn" id="b-msg">Copiar mensagem</button><button class="btn ghost" id="b-print2">Abrir pedido em PDF</button><span id="msg-st" role="status"></span></div>
+  </div>
+</section>
+</div>
+
+<section id="ficha" aria-label="Pedido ao marceneiro para impressão"></section>
+
+<script>
+{
+const $=q=>document.querySelector(q);
+const FIN={
+  branco:{n:'Branco TX',carc:'#ecebe6',front:'#f8f7f3',inner:'#d4d2ca',edge:'#9c998f',lab:'#3a3d41',hand:'#8a8f96',plinth:'#c3c0b6'},
+  grafite:{n:'Grafite / cinza chumbo',carc:'#4a4e53',front:'#585d63',inner:'#35383c',edge:'#202326',lab:'#eef0f2',hand:'#c3c7cb',plinth:'#2c2f33'},
+  carvalho:{n:'Amadeirado / carvalho',carc:'#bf9767',front:'#c9a273',inner:'#987650',edge:'#6c4c2c',lab:'#2a1b0c',hand:'#3b2a19',plinth:'#7a5936',wood:1},
+  preto:{n:'Preto fosco',carc:'#232426',front:'#2c2d30',inner:'#18191a',edge:'#050505',lab:'#e6e6e6',hand:'#8d9196',plinth:'#101112'}
+};
+const ERG={H:155,eye:144,elbow:98,sh:127,green:120,reach:185};
+const LAB={rodape:'Pés reguláveis',base:'Base do forno',nicho1:'Nicho 1',forno:'Forno Midea 80 L',pratA:'Prateleira intermediária',nicho2:'Nicho 2',micro:'Micro-ondas ME36B',pratB:'Prateleira de apoio',nicho3:'Nicho 3',oster:'Oster OFOR250',superior:'Armário superior'};
+const ORDER=Object.keys(LAB);
+let st={lay:'tri',fin:'branco',ergo:true,cotas:true,elec:true,side:null,scale:'auto',unit:'cm',fecho:'240',n3:'46.5',ped:{cli:'',tel:'',end:'',prazo:'',mar:''},dob:'d',volt:'220',pe:260,banc:90,sel:'oster'};
+try{const sv=JSON.parse(localStorage.getItem('torre3-v2')||'{}');Object.assign(st,sv);st.ped=Object.assign({cli:'',tel:'',end:'',prazo:'',mar:''},sv.ped||{})}catch(e){}
+st.lay='tri';
+const save=()=>{try{localStorage.setItem('torre3-v2',JSON.stringify(st))}catch(e){}};
+let hoverId=null;
+
+const n1=v=>String(Math.round(v*10)/10).replace('.',',');
+const f=v=>st.unit==='mm'?String(Math.round(v*10)):n1(v);
+const fu=v=>f(v)+' '+st.unit;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function model(){
+  const e=1.8,W=60,D=60,inner=W-2*e,r=10,sb=8.2,n1=60,n2=st.n3==='45'?45:46.5,n3=40;
+  const y1=r,y2=y1+n1,y3=y2+e,y4=y3+n2,y5=y4+e,y6=y5+n3;
+  const T=st.fecho==='75'?y6+75:240;
+  const tri=st.lay==='tri';
+  const bh=Math.min(100,Math.max(75,+st.banc||90));
+  return {e,W,D,inner,r,sb,n1,n2,n3,y1,y2,y3,y4,y5,y6,T,sup:T-y6,tri,bh,
+    mwN:tri?n3:n2,mwNt:tri?y6:y4,
+    ov:{y0:y1,w:59.5,h:59.5,d:57.5,body:56},
+    mw:{y0:tri?y5:y3,w:52,h:32.5,d:41.9,rec:1,P:1600,kg:15.2},
+    os:{y0:tri?y3:bh,w:40,h:36.5,d:37.5,rec:3,P:1700,kg:8}};
+}
+function der(m){
+  const o=m.os,w=m.mw;
+  return {
+    ovR:[m.y1+12,m.y1+40],ovP:[m.y1+48,m.y1+59.5],ovTop:m.y1+59.5,ovFit:(m.inner-m.ov.body)/2,
+    mwTop:w.y0+32.5,mwC:[w.y0+2.5,w.y0+28],mwP:[w.y0+3,w.y0+29.5],mwT:m.mwN-32.5,mwS:(m.inner-52)/2,mwB:m.D-1-41.9,
+    osTop:o.y0+o.h,osC:[o.y0+4,o.y0+o.h-4.5],osP:[o.y0+3,o.y0+o.h-2.5],osT:m.n2-o.h,osS:(m.inner-40)/2,osB:m.D-3-o.d,
+    t1y:Math.round(m.y3+8),t3y:m.tri?Math.round(m.y5+8):Math.round(m.bh+20),
+    nk:ERG.sh-7.6,
+    diag:Math.sqrt(m.T**2+m.D**2),shelfS:Math.round(m.y6+(m.T-1.8-m.y6)/2)
+  };
+}
+function elec(m){
+  const V=+st.volt,d=der(m);
+  const row=(id,ap,P,dj)=>{const I=P?P/V:null;return {id,ap,P,I,dj:dj||(I<=12.8?16:20),tom:I===null?'20 A':(I>10?'20 A':'10 A')}};
+  const mid=m.tri?['Oster OFOR250',1700,'oster',d.osB]:['Micro-ondas ME36B',1600,'micro',d.mwB];
+  const top=m.tri?['Micro-ondas ME36B',1600,'micro']:['Oster OFOR250',1700,'oster'];
+  return [
+    Object.assign(row('T1','Forno Midea 80 L',null,20),{k:'forno',pos:`Lateral interna esquerda do nicho 2, terço traseiro (atrás da linha do aparelho do meio), a ${fu(d.t1y)} do piso. Cabo sobe pelo rasgo traseiro da prateleira de ${fu(m.y2)}.`}),
+    Object.assign(row('T2',mid[0],mid[1]),{k:mid[2],pos:`Lateral interna direita do nicho 2, terço traseiro, a ${fu(d.t1y)} do piso, no vão livre de ${fu(mid[3])} atrás do aparelho, não na traseira dele.`}),
+    Object.assign(row('T3',top[0],top[1]),{k:top[2],pos:m.tri?`Lateral interna esquerda do nicho 3, terço traseiro, a ${fu(d.t3y)} do piso, no vão livre de ${fu(d.mwB)} atrás do micro-ondas.`:`Parede da bancada, ao lado do aparelho, a ${fu(d.t3y)} do piso (20 cm acima do tampo).`})
+  ];
+}
+
+function info(id,m,d){
+  const o=m.os,E=elec(m),V=st.volt;
+  const I={
+  rodape:{t:'Pés reguláveis',a:0,b:m.r,rows:[['Altura dos pés',fu(m.sb)],['Regulagem','± 1,5 cm'],['Quantidade','6 (4 cantos + 2 no meio)'],['Recuo da frente',fu(5)],['Vão livre sob a torre',fu(m.sb)]],
+    tx:'Sem rodapé: a torre fica sobre seis pés reguláveis de cerca de 8 cm (faixa comum de 7 a 10 cm) que, somados à base de 18 mm, mantêm os 10 cm do chão até o fundo do forno. Quatro nos cantos e dois no meio, sob o forno, que é a carga mais pesada. Pés recuados 5 cm da frente: o vão aberto embaixo também acomoda a ponta dos pés de quem usa o forno. Facilita a limpeza e não absorve água de pano úmido.',
+    vent:'O vão aberto sob a torre é a entrada de ar frio: sobe pelo recorte traseiro da base e pelo vão atrás do forno até os rasgos das prateleiras.',tom:'Nenhuma.'},
+  base:{t:'Base do forno 1',a:m.sb,b:m.r,rows:[['Face superior',fu(m.r)+' do piso'],['Espessura',fu(1.8)],['Apoio','6 pés + 2 travessas'],['Carga de projeto','≥ 45 kg']],
+    tx:'Sem rodapé, a base vira o fundo estrutural da torre: MDF 18 mm com duas travessas de 5 cm por baixo (frente e fundo), parafusada e cavilhada nas laterais, apoiada nos seis pés. Ela recebe o forno de embutir e o esforço da porta aberta usada como apoio. Com MDF 25 mm as travessas podem sair, mas a base sobe para 10,7 cm.',
+    vent:'Recorte de 5 cm na traseira da base, em toda a largura, para o ar que entra por baixo subir.',tom:'Nenhuma.'},
+  nicho1:{t:'Nicho 1: forno de embutir',a:m.y1,b:m.y2,rows:[['Altura livre',fu(m.n1)],['Largura livre',fu(m.inner)],['Profundidade',fu(m.D)+', fundo aberto'],['Folga em altura',fu(m.n1-59.5)],['Folga lateral do corpo',fu(d.ovFit)+' por lado'],['Folga traseira',fu(m.D-57.5)]],
+    tx:'Laterais de 18 mm deixam vão de 56,4 cm para o corpo de 56 cm informado: encaixa, mas justo. Confira a medida de nicho do manual de instalação antes de cortar.',
+    vent:'Sem fundo. Ar frio entra pelo vão sob a torre e sobe pelo vão traseiro de 2,5 cm até o rasgo da prateleira intermediária.',tom:'Nada atrás do forno: a tomada dele (T1) fica no nicho 2.'},
+  forno:{t:'Forno elétrico Midea 80 L',a:d.ovTop-59.5,b:d.ovTop,rows:[['Frente (L × A)',fu(59.5)+' × '+fu(59.5)],['Corpo traseiro',fu(m.ov.body)],['Profundidade',fu(57.5)],['Painel de comando',fu(d.ovP[0])+' a '+fu(d.ovP[1])],['Grades (faixa útil)',fu(d.ovR[0])+' a '+fu(d.ovR[1])],['Porta aberta','≈ '+fu(48)+' à frente']],
+    tx:'Zona verde: as cargas quentes passam abaixo da cintura, longe do rosto. A grade inferior fica a cerca de 22 cm do piso e pede agachamento com joelhos flexionados; prefira as grades média e alta. A porta abre a cerca de 13 cm do piso: fique ao lado dela.',
+    vent:'Não sobreponha frentes ou puxadores à moldura do forno; a saída de ar do painel é frontal.',tom:`T1: circuito exclusivo com disjuntor de 20 A e tomada de 20 A. ${E[0].pos} Bitola conforme a potência da etiqueta (220 V é o usual nesses fornos).`},
+  pratA:{t:'Prateleira intermediária',a:m.y2,b:m.y3,rows:[['Face inferior',fu(m.y2)+' do piso'],['Face superior',fu(m.y3)+' do piso'],['Espessura',fu(1.8)],['Rasgo traseiro',fu(5)+' em toda a largura']],
+    tx:'Fixa, parafusada nas laterais. O briefing a posiciona em 70 cm; aqui 70 cm é a face inferior, para manter os 60 cm livres do forno.',
+    vent:'O rasgo traseiro é a chaminé do forno e a passagem do cabo até a T1.',tom:'Nenhuma.'},
+  nicho2:m.tri?{t:'Nicho 2: air fryer',a:m.y3,b:m.y4,rows:[['Altura livre',fu(m.n2)],['Largura livre',fu(m.inner)],['Profundidade',fu(m.D)],['Folga no topo',fu(d.osT)],['Folga lateral',fu(d.osS)+' por lado'],['Livre atrás',fu(d.osB)]],
+    tx:'Na altura do cotovelo: cesto e assadeira quentes saem com os braços baixos e o painel fica todo à vista. Uma bandeja corrediça com trava permite puxar o aparelho para fora antes de abrir a porta.',
+    vent:`Teto do nicho com chapa de alumínio ou laminado resistente ao calor. ${fu(d.osT)} livres no topo para a exaustão; fundo vazado.`,tom:'T1 (forno) e T2 (air fryer) ficam aqui, nas laterais, atrás da linha do aparelho.'}
+   :{t:'Nicho 2: micro-ondas',a:m.y3,b:m.y4,rows:[['Altura livre',fu(m.n2)],['Largura livre',fu(m.inner)],['Profundidade',fu(m.D)],['Folga no topo',fu(d.mwT)],['Folga lateral',fu(d.mwS)+' por lado'],['Livre atrás',fu(d.mwB)]],
+    tx:'No layout duplo o micro-ondas desce para cá: prato abaixo do cotovelo, líquidos quentes saem na altura das mãos.',
+    vent:'Frente aberta, fundo vazado.',tom:'T1 (forno) e T2 (micro-ondas) nas laterais, atrás da linha do aparelho.'},
+  micro:{t:'Micro-ondas Electrolux ME36B',a:m.mw.y0,b:d.mwTop,rows:[['Medidas (L × A × P)',`${fu(52)} × ${fu(32.5)} × ${fu(41.9)}`],['Potência','1.600 W'],['Peso','15,2 kg'],['Prato giratório','≈ '+fu(m.mw.y0+2.5)+' do piso'],['Painel (lado direito)',fu(d.mwP[0])+' a '+fu(d.mwP[1])],['Posição',(m.tri?'nicho 3':'nicho 2')+', recuo de '+fu(1)]],
+    tx:(m.tri?'Entre o cotovelo e os ombros: bom para pratos, porções e reaquecer. Líquidos quentes (sopa, água) só em recipiente com alça, sem encher até a borda. ':'')+'Aparelho de bancada, não de embutir: confirme no manual as folgas mínimas. Frente a no máximo 1 cm da face do móvel para a porta lateral abrir 90° sem bater na lateral.',
+    vent:`${fu(d.mwT)} no topo e ${fu(d.mwS)} por lado. A traseira fica livre: ${fu(d.mwB)} até a parede.`,tom:(e=>`${e.id}: circuito exclusivo, disjuntor de ${e.dj} A, tomada de ${e.tom} (${n1(e.I)} A em ${V} V). ${e.pos}`)(E.find(e=>e.k==='micro'))},
+  pratB:{t:'Prateleira superior de apoio',a:m.y4,b:m.y5,rows:[['Face inferior',fu(m.y4)+' do piso'],['Face superior',fu(m.y5)+' do piso'],['Espessura',fu(1.8)],['Rasgo traseiro',fu(5)]],
+    tx:m.tri?'Fixa, parafusada nas laterais. A face inferior é o teto do nicho da air fryer: revista com alumínio ou laminado resistente ao calor.':'Fixa, parafusada nas laterais. Separa o micro-ondas da despensa.',
+    vent:'Rasgo traseiro de 5 cm, alinhado com o de baixo.',tom:'Nenhuma.'},
+  nicho3:m.tri?{t:'Nicho 3: micro-ondas',a:m.y5,b:m.y6,rows:[['Altura livre',fu(m.n3)],['Largura livre',fu(m.inner)],['Profundidade',fu(m.D)],['Folga no topo',fu(d.mwT)],['Folga lateral',fu(d.mwS)+' por lado'],['Livre atrás',fu(d.mwB)]],
+    tx:'Zona amarela: o prato fica entre o cotovelo e os ombros. Para pratos e porções, que são leves, é uma altura confortável; o cuidado é com líquidos quentes.',
+    vent:'Frente aberta, sem porta. Fundo vazado; o ar quente sai pelo vão traseiro.',tom:'T3 (micro-ondas) na lateral interna esquerda, terço traseiro.'}
+   :{t:'Nicho 3: despensa com porta',a:m.y5,b:m.y6,rows:[['Altura livre',fu(m.n3)],['Largura livre',fu(m.inner)],['Profundidade útil',fu(57)],['Porta','giro, dobradiça à esquerda']],
+    tx:'No layout duplo, a mesma caixa recebe porta de giro e uma prateleira regulável: potes, temperos e assadeiras leves. A carcaça não muda; dá para voltar ao layout triplo depois.',
+    vent:'Sem exigência.',tom:'Nenhuma.'},
+  oster:{t:'Forno / air fryer Oster OFOR250',a:o.y0,b:d.osTop,rows:[['Medidas (L × A × P)',`${fu(40)} × ${fu(o.h)} × ${fu(o.d)}`],['Potência','1.700 W'],['Topo do aparelho',fu(d.osTop)+' do piso'],['Cavidade',fu(d.osC[0])+' a '+fu(d.osC[1])],['Painel (lado direito)',fu(d.osP[0])+' a '+fu(d.osP[1])],['Posição',m.tri?'nicho 2, recuo de '+fu(3):'bancada a '+fu(m.bh)]],
+    tx:m.tri?'Zona verde, na altura do cotovelo: cesto e assadeira quentes saem sem elevar os braços e sem passar perto do rosto. Painel lateral inteiro abaixo dos olhos.':'Na bancada, a cavidade fica entre o cotovelo e o peito, com o painel abaixo dos olhos: manuseio seguro.',
+    vent:m.tri?`${fu(d.osT)} no topo, ${fu(d.osS)} por lado e ${fu(d.osB)} atrás. Recue 3 cm da borda para a porta abrir apoiada na prateleira.`:'Deixe 10 cm livres atrás e nas laterais na bancada.',tom:(e=>`${e.id}: circuito exclusivo, disjuntor de ${e.dj} A, tomada de ${e.tom} (${n1(e.I)} A em ${V} V). ${e.pos}`)(E.find(e=>e.k==='oster'))},
+  superior:{t:'Armário superior (tulha)',a:m.y6,b:m.T,rows:[['Altura',fu(m.sup)],['Largura interna',fu(m.inner)],['Profundidade útil',fu(57)],['Prateleira interna',fu(d.shelfS)+' do piso'],['Alcance direto até','≈ '+fu(ERG.reach)]],
+    tx:`Estocagem de uso eventual. Porta de abrir ${DOB().abre}: dobradiças à ${DOB().lado}, com amortecedor, e puxador vertical na ${DOB().pux}, na parte de baixo (cerca de 163 a 178 cm), ao alcance da mão. A borda inferior da porta fica a ${fu(m.y6)}, acima da cabeça (155): abre sem bater. Acima de 185 cm, use banqueta de um degrau.`,
+    vent:'A face inferior é o teto do nicho 3: acabamento resistente ao calor.',tom:'Nenhuma.'}
+  };
+  return I[id];
+}
+
+function checks(m,d){
+  const o=m.os,c=[];
+  const add=(ids,s,t,x)=>c.push({ids,s,t,x});
+  const fr=(a,b)=>Math.round(Math.max(0,Math.min(1,(ERG.eye-a)/(b-a)))*100);
+  add(['forno','nicho1'],'ok','Forno na zona verde',`Aparelho de ${fu(m.y1)} a ${fu(d.ovTop)}, inteiro abaixo de 120 cm: a assadeira quente nunca passa perto do rosto.`);
+  add(['forno'],'warn','Postura na grade inferior',`Grades entre ${fu(d.ovR[0])} e ${fu(d.ovR[1])}. A mais baixa pede agachamento; use as grades média e alta para cargas pesadas.`);
+  if(m.tri){
+    const cm=(d.osC[0]+d.osC[1])/2;
+    add(['oster','nicho2'],d.osTop<=ERG.green?'ok':'warn','Air fryer na altura do cotovelo',`Cavidade de ${fu(d.osC[0])} a ${fu(d.osC[1])}, centro a ${fu(cm)}: zona verde, cesto e assadeira saem com os braços baixos.`);
+    add(['oster'],d.osTop<=ERG.eye?'ok':'warn','Painel da air fryer',`Topo a ${fu(d.osTop)}, ${fu(ERG.eye-d.osTop)} abaixo dos olhos: painel inteiro à vista.`);
+    add(['oster','nicho2'],d.osT>=10?'ok':'bad','Exaustão no topo do nicho 2',d.osT>=10?`${fu(d.osT)} livres acima do aparelho (mínimo pedido: 10 cm).`:`Só ${fu(d.osT)} livres acima do aparelho de ${fu(o.h)}. Use o nicho com ${fu(o.h+10)} para garantir os 10 cm.`);
+    add(['oster','nicho2'],d.osS>=10?'ok':'warn','Folga lateral da air fryer',`${fu(d.osS)} por lado. Se o manual pedir 10 cm, use a bandeja corrediça e opere com o aparelho puxado.`);
+    add(['micro','nicho3'],'warn','Micro-ondas na zona amarela',`Prato a ${fu(m.mw.y0+2.5)}, entre o cotovelo (98) e os ombros (≈127). Bom para pratos e porções; sopa e água quente só em recipiente com alça, sem encher.`);
+    const nkOk=m.mw.y0<=d.nk+0.05;
+    add(['micro'],nkOk?'ok':(m.mw.y0<=ERG.sh?'warn':'bad'),'Altura máxima do micro-ondas',`A NKBA recomenda a base do micro cerca de 7,6 cm abaixo do ombro: ≈ ${fu(d.nk)} aqui. A base fica a ${fu(m.mw.y0)}${nkOk?', dentro da recomendação.':`, ${fu(m.mw.y0-d.nk)} acima: no limite.${st.n3==='45'?'':' Com o nicho da air fryer em 45 cm ela desce para '+fu(m.mw.y0-1.5)+'.'}`}`);
+    add(['micro'],d.mwTop<=ERG.eye?'ok':'warn','Painel do micro-ondas e linha dos olhos',d.mwTop<=ERG.eye?`Aparelho inteiro abaixo dos olhos.`:`Topo a ${fu(d.mwTop)}, ${fu(d.mwTop-ERG.eye)} acima dos olhos; ${fr(d.mwP[0],d.mwP[1])}% do painel fica abaixo da linha dos olhos.`);
+  }else{
+    add(['micro','nicho2'],'ok','Micro-ondas abaixo do cotovelo',`Prato a ${fu(m.mw.y0+2.5)} e topo a ${fu(d.mwTop)}: líquidos quentes saem na altura das mãos.`);
+    add(['oster'],d.osC[1]<=ERG.green?'ok':'warn','Air fryer na bancada',`Cavidade de ${fu(d.osC[0])} a ${fu(d.osC[1])} sobre a bancada de ${fu(m.bh)}: zona verde, painel abaixo dos olhos.`);
+    add(['nicho3'],'info','Nicho 3 vira despensa','Mesma carcaça com porta de giro; a torre pode voltar ao layout triplo sem obra.');
+  }
+  add(['micro',m.tri?'nicho3':'nicho2'],d.mwS<5?'warn':'ok','Folgas do micro-ondas',`${fu(d.mwT)} no topo e ${fu(d.mwS)} por lado. É de bancada: confira no manual as folgas mínimas antes de fechar o nicho.`);
+  add(['nicho1','forno'],d.ovFit>=0.4?'ok':'warn','Encaixe do forno na largura',`Corpo de ${fu(m.ov.body)} em vão de ${fu(m.inner)}: ${st.unit==='mm'?Math.round(d.ovFit*10)+' mm':n1(d.ovFit)+' cm'} por lado. Se o manual pedir nicho de 56,8 cm, use laterais de 15 mm.`);
+  add(['nicho1','pratA'],'ok','Altura e ventilação do forno',`${fu(m.n1-59.5)} de folga em altura, fundo aberto e ${fu(m.D-57.5)} atrás, com entrada de ar por baixo da torre e rasgos de 5 cm na base e nas prateleiras.`);
+  add(['nicho2','forno','micro','oster'],'ok','Tomadas fora da traseira dos aparelhos',`T1 (forno) e T2 (${m.tri?'air fryer':'micro-ondas'}) nas laterais do nicho 2; T3 (${m.tri?'micro-ondas':'air fryer'}) ${m.tri?'na lateral do nicho 3':'na parede da bancada'}. Sempre atrás da linha de profundidade do aparelho.`);
+  add(['rodape','base'],'info','Torre sobre pés','Seis pés reguláveis de cerca de 8 cm (10 cm com a base), dois deles sob o forno. Sem rodapé travando a base, a fixação anti-tombamento no topo passa a ser obrigatória.');
+  add(['superior'],'info','Alcance do armário superior',`Base a ${fu(m.y6)}, acima da cabeça (155). Alcance direto até cerca de 185 cm; acima, banqueta.`);
+  const pe=+st.pe||0;
+  add(['superior','rodape'],pe<m.T+1?'bad':pe<d.diag+1?'warn':'ok','Pé-direito para montar',pe<m.T+1?`Pé-direito de ${fu(pe)} não comporta a torre de ${fu(m.T)}.`:pe<d.diag+1?`Para erguer a torre deitada são precisos ${fu(Math.ceil(d.diag+1))}. Peça a torre em dois corpos (até ${fu(m.y5)} e acima) ou monte em pé no local.`:`${fu(pe)} permite erguer a torre montada (diagonal de ${fu(d.diag)}).`);
+  return c;
+}
+
+const fl=v=>v.toFixed(1);
+function lay(s,o,m){
+  const ML=o.compact?66:90,G=o.compact?50:66,fx=ML,F=m.tri?60:120;
+  const ax=fx+F*s+G,LW=o.compact?128:158;
+  const pcx=o.side?ax+122*s:ax+24*s;
+  let LX,W;
+  if(o.ergo){LX=pcx+15*s+10;W=LX+LW}else{LX=0;W=o.side?ax+112*s+16:ax+4}
+  const MT=34,MB=64;
+  return {ML,G,fx,F,ax,pcx,LX,LW,W,MT,MB,H:MT+m.T*s+MB};
+}
+
+function drawing(o){
+  const m=model(),d=der(m),F=FIN[st.fin],s=o.s,T=m.T,L=lay(s,o,m),p=o.pre;
+  const Y=v=>L.MT+(T-v)*s,X=v=>L.fx+v*s,SX=v=>L.ax+v*s,PX=v=>L.pcx+v*s;
+  const R=(x,y,w,h,a)=>`<rect x="${fl(x)}" y="${fl(y)}" width="${fl(Math.max(w,0))}" height="${fl(Math.max(h,0))}" ${a||''}/>`;
+  const fb=(x0,x1,y0,y1,a)=>R(X(x0),Y(y1),(x1-x0)*s,(y1-y0)*s,a);
+  const sb=(x0,x1,y0,y1,a)=>R(SX(x0),Y(y1),(x1-x0)*s,(y1-y0)*s,a);
+  const fr=F.wood?`url(#${p}wd)`:F.front, cr=F.wood?`url(#${p}wc)`:F.carc;
+  const FR=`fill="${fr}" stroke="${F.edge}" stroke-width=".8"`;
+  const foot=(bx,x)=>bx(x-1.6,x+1.6,1,m.sb,`fill="url(#${p}iv)" stroke="#5d6369" stroke-width=".7"`)+bx(x-2.6,x+2.6,0,1,'fill="#3d4146"')+bx(x-2.2,x+2.2,m.sb-0.6,m.sb,'fill="#3d4146"');
+  const tx=(x,y,t,a)=>`<text x="${fl(x)}" y="${fl(y)}" ${a||''}>${t}</text>`;
+  const hit=(id,inner,box,focus)=>`<g class="hit${st.sel===id?' sel':''}" data-id="${id}"${focus?` tabindex="0" role="button" aria-label="${esc(LAB[id])}"`:''}>${inner}${box.replace('/>',' class="hl"/>')}</g>`;
+  const ln=(x1,y1,x2,y2,a)=>`<line x1="${fl(x1)}" y1="${fl(y1)}" x2="${fl(x2)}" y2="${fl(y2)}" ${a||''}/>`;
+  const ty=v=>v.toFixed(1);
+  let g=[];
+  // defs
+  const grain=(id,base)=>`<pattern id="${p}${id}" width="16" height="140" patternUnits="userSpaceOnUse"><rect width="16" height="140" fill="${base}"/><path d="M3 0C4.5 40 2 90 3.5 140M10 0C9 35 11.5 80 10 140M14 0C13.5 50 15 100 13.8 140" stroke="${F.edge}" stroke-opacity=".3" fill="none"/></pattern>`;
+  g.push(`<defs>${F.wood?grain('wd',F.front)+grain('wc',F.carc):''}
+  <linearGradient id="${p}gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4a525c"/><stop offset=".45" stop-color="#20252b"/><stop offset="1" stop-color="#14171b"/></linearGradient>
+  <linearGradient id="${p}ix" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e6e9"/><stop offset="1" stop-color="#a9afb5"/></linearGradient>
+  <linearGradient id="${p}iv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9dde1"/><stop offset="1" stop-color="#9ba1a8"/></linearGradient>
+  <pattern id="${p}ht" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--mut)" stroke-width="1"/></pattern></defs>`);
+  // floor
+  g.push(ln(L.fx-10,Y(0),L.W-8,Y(0),'stroke="var(--ink)" stroke-width="1.6"'));
+  // titles
+  g.push(tx(L.fx,20,'Vista frontal','class="vt"'));
+  if(o.side)g.push(tx(L.ax,20,'Corte lateral','class="vt"'));
+  if(o.ergo)g.push(tx(L.pcx-10*s,20,'Usuária 1,55 m','class="vt"'));
+
+  // ---------- FRONT
+  g.push(fb(0,60,m.sb,T,`fill="${cr}" stroke="${F.edge}"`));
+  // rodape
+  g.push(hit('rodape',[4,30,56].map(x=>foot(fb,x)).join(''),fb(0,60,0,m.sb),1));
+  g.push(hit('base',fb(0,60,m.sb,m.r,FR),fb(0,60,m.sb-0.6,m.r+0.6),1));
+  // nicho1 + forno
+  g.push(hit('nicho1',fb(m.e,60-m.e,m.y1,m.y2,`fill="${F.inner}"`),fb(0,60,m.y1,m.y2),1));
+  {const y0=m.y1;let a='';
+   a+=fb(0.25,59.75,y0,y0+59.5,'fill="#1b1d20" stroke="#000" rx="2"');
+   a+=fb(0.25,59.75,y0+48,y0+59.5,'fill="#2b2f34"');
+   a+=fb(23.5,36.5,y0+51.5,y0+55.8,'fill="#0d1612" stroke="#3a4047"')+fb(25,35,y0+52.6,y0+54.6,'fill="#41d68a" opacity=".55"');
+   [9,50.75].forEach(x=>{a+=`<circle cx="${fl(X(x))}" cy="${fl(Y(y0+53.75))}" r="${fl(2.3*s)}" fill="#3a3f45" stroke="#6b7178"/>`});
+   a+=fb(6,53.5,y0+6,y0+41.5,`fill="url(#${p}gl)" stroke="#000"`);
+   [12,26,40].forEach(r=>{a+=ln(X(7.5),Y(y0+r),X(52),Y(y0+r),'stroke="#7a6350" stroke-opacity=".65" stroke-dasharray="3 3"')});
+   a+=fb(7,52.5,y0+43.6,y0+45.2,`fill="url(#${p}ix)"`);
+   if(s>=1.6)a+=tx(X(30),Y(y0+31),'Forno 80 L','text-anchor="middle" font-size="12.5" fill="#c9ced4"');
+   g.push(hit('forno',a,fb(0.25,59.75,y0,y0+59.5),1));}
+  g.push(hit('pratA',fb(0,60,m.y2,m.y3,FR),fb(0,60,m.y2-0.8,m.y3+0.8),1));
+  // nicho2 + micro
+  g.push(hit('nicho2',fb(m.e,60-m.e,m.y3,m.y4,`fill="${F.inner}"`)+(m.tri?fb(m.e,60-m.e,m.y4-0.8,m.y4,'fill="#b9bdc2" opacity=".8"'):''),fb(0,60,m.y3,m.y4),1));
+  g.push(hit('pratB',fb(0,60,m.y4,m.y5,FR),fb(0,60,m.y4-0.8,m.y5+0.8),1));
+  // nicho3
+  if(m.tri){g.push(hit('nicho3',fb(m.e,60-m.e,m.y5,m.y6,`fill="${F.inner}"`),fb(0,60,m.y5,m.y6),1))}
+  else{const mid=(m.y5+m.y6)/2;let a=fb(0.15,59.85,m.y5+0.15,m.y6-0.15,FR);
+    a+=`<path d="M${fl(X(59.85))} ${fl(Y(m.y6-0.15))}L${fl(X(0.4))} ${fl(Y(mid))}L${fl(X(59.85))} ${fl(Y(m.y5+0.15))}" fill="none" stroke="${F.lab}" stroke-opacity=".35" stroke-dasharray="5 4"/>`;
+    a+=fb(54.5,55.5,mid-7,mid+7,`fill="${F.hand}"`);
+    if(s>=1.5)a+=tx(X(28),Y(mid)+4,'Despensa',`text-anchor="middle" class="rl" fill="${F.lab}"`);
+    g.push(hit('nicho3',a,fb(0,60,m.y5,m.y6),1))}
+  {const y0=m.mw.y0;let a='';
+   a+=fb(6,10,y0,y0+0.8,'fill="#333"')+fb(50,54,y0,y0+0.8,'fill="#333"');
+   a+=fb(4,56,y0+0.8,y0+32.5,`fill="#f2f2ef" stroke="#8a8d90" rx="${fl(1.2*s)}"`);
+   a+=fb(5.5,42,y0+3,y0+29.5,`fill="url(#${p}gl)" stroke="#2c3035"`);
+   a+=fb(43.5,54.5,y0+3,y0+29.5,'fill="#e4e4e0" stroke="#b5b7b9"');
+   a+=fb(45,53,y0+24,y0+27.5,'fill="#1d2a24"');
+   [20.5,17.2,13.9,10.6].forEach(yy=>{a+=fb(45,48.6,y0+yy,y0+yy+2.2,'fill="#c9cbcd" rx="1"')+fb(49.4,53,y0+yy,y0+yy+2.2,'fill="#c9cbcd" rx="1"')});
+   a+=fb(45,53,y0+5,y0+8.2,'fill="#9aa0a6" rx="1.5"');
+   if(s>=1.6)a+=tx(X(23.7),Y(y0+15),'Micro 36 L','text-anchor="middle" font-size="12.5" fill="#c9ced4"');
+   g.push(hit('micro',a,fb(4,56,y0,y0+32.5),1));}
+  // oster
+  const osx=m.tri?10:70;
+  {const o=m.os,y0=o.y0,h=o.h;let a='';
+   a+=fb(osx+2,osx+6,y0,y0+1.2,'fill="#222"')+fb(osx+34,osx+38,y0,y0+1.2,'fill="#222"');
+   a+=fb(osx,osx+40,y0+1.2,y0+h,`fill="url(#${p}ix)" stroke="#5d6369" rx="${fl(1.6*s)}"`);
+   a+=fb(osx+2,osx+28,y0+4,y0+h-5.5,`fill="url(#${p}gl)" stroke="#2c3035"`);
+   a+=fb(osx+4,osx+26,y0+h-4.3,y0+h-3.1,'fill="#2b2f33"');
+   a+=fb(osx+29.5,osx+38.5,y0+3,y0+h-2.5,'fill="#2c3035"');
+   const kh=(h-5.5)/4;[1,2,3].forEach(i=>{const cy=Y(y0+3+kh*i),cx=X(osx+34);a+=`<circle cx="${fl(cx)}" cy="${fl(cy)}" r="${fl(2.3*s)}" fill="#4a5057" stroke="#9aa1a8"/>`+ln(cx,cy,cx,cy-2*s,'stroke="#e6e8ea" stroke-width="1.2"')});
+   a+=ln(X(osx+3.5),Y(y0+12),X(osx+26.5),Y(y0+12),'stroke="#7a6350" stroke-opacity=".65" stroke-dasharray="3 3"');
+   if(s>=1.8)a+=tx(X(osx+15),Y(y0+h/2),'25 L','text-anchor="middle" font-size="12.5" fill="#c9ced4"');
+   if(!m.tri){g.push(fb(60.5,120,m.r,m.bh-3,'fill="none" stroke="var(--mut)" stroke-dasharray="6 4"')+fb(60,121,m.bh-3,m.bh,'fill="#d7d2c8" stroke="#8f897d"'));
+     if(s>=1.4)g.push(tx(X(90),Y(m.bh/2)+4,'Bancada existente','text-anchor="middle" class="lv"'))}
+   g.push(hit('oster',a,fb(osx,osx+40,y0,y0+h),1));}
+  // superior
+  {let a=fb(0.15,59.85,m.y6+0.15,T-0.15,FR);
+   {const hr=st.dob!=='e',fx0=hr?0.4:59.6,hx=hr?59.6:0.4,mid=(m.y6+T)/2;
+    a+=`<path d="M${fl(X(fx0))} ${fl(Y(T-0.4))}L${fl(X(hx))} ${fl(Y(mid))}L${fl(X(fx0))} ${fl(Y(m.y6+0.4))}" fill="none" stroke="${F.lab}" stroke-opacity=".35" stroke-dasharray="5 4"/>`;
+    const px=hr?4.5:54.5;a+=fb(px,px+1,m.y6+3,m.y6+18,`fill="${F.hand}"`);
+    [m.y6+10,T-10].forEach(y=>{a+=fb(hr?57.4:1.2,hr?58.8:2.6,y-2,y+2,`fill="${F.lab}" fill-opacity=".25"`)});}
+   if(s>=1.4)a+=tx(X(30),Y(m.y6+m.sup*0.33)+4,s>=2.2?'Armário superior':'Armário',`text-anchor="middle" class="rl" fill="${F.lab}"`);
+   g.push(hit('superior',a,fb(0,60,m.y6,T),1));}
+  g.push(fb(0,60,m.sb,T,'fill="none" stroke="var(--ink)" stroke-width="1.4" class="ov"'));
+
+  // ---------- SIDE
+  if(o.side){
+    g.push(R(SX(0)-9,Y(T+4),9,(T+4)*s,`fill="url(#${p}ht)" class="ov"`)+ln(SX(0),Y(T+4),SX(0),Y(0),'stroke="var(--ink)" stroke-width="1.4"'));
+    g.push(sb(0,60,m.sb,T,`fill="${F.carc}" fill-opacity=".38"`));
+    g.push(hit('rodape',[7,52].map(x=>foot(sb,x)).join('')+sb(2,3.8,m.sb-5,m.sb,FR)+sb(56.2,58,m.sb-5,m.sb,FR),sb(0,60,0,m.sb)));
+    g.push(hit('base',sb(5,60,m.sb,m.r,FR),sb(0,60,m.sb-0.6,m.r+0.6)));
+    g.push(hit('nicho1','',sb(0,60,m.y1,m.y2)));
+    g.push(hit('forno',sb(2.5,58,m.y1,m.y1+59.5,'fill="#26292d" stroke="#000"')+sb(58,60.4,m.y1,m.y1+59.5,'fill="#15171a"')+sb(60.4,62.2,m.y1+43.6,m.y1+45.2,'fill="#aeb4ba"'),sb(2.5,62.2,m.y1,m.y1+59.5)));
+    g.push(hit('pratA',sb(5,60,m.y2,m.y3,FR),sb(0,60,m.y2-0.8,m.y3+0.8)));
+    g.push(hit('nicho2',m.tri?sb(0.6,60,m.y4-0.8,m.y4,'fill="#b9bdc2" opacity=".8"'):'',sb(0,60,m.y3,m.y4)));
+    g.push(hit('pratB',sb(5,60,m.y4,m.y5,FR),sb(0,60,m.y4-0.8,m.y5+0.8)));
+    if(m.tri)g.push(hit('nicho3','',sb(0,60,m.y5,m.y6)));
+    else g.push(hit('nicho3',sb(58.2,60,m.y5+0.15,m.y6-0.15,FR)+sb(1,57.5,(m.y5+m.y6)/2,(m.y5+m.y6)/2+1.8,FR),sb(0,60,m.y5,m.y6)));
+    {const mx=60-1-41.9,y0=m.mw.y0;
+    g.push(hit('micro',sb(mx,59,y0+0.8,y0+32.5,'fill="#eeeeea" stroke="#8a8d90"')+sb(58,59,y0+2.5,y0+30,'fill="#2c3035"')+sb(mx+3,mx+7,y0,y0+0.8,'fill="#333"')+sb(52,56,y0,y0+0.8,'fill="#333"'),sb(mx,59,y0,y0+32.5)));}
+    if(m.tri){const ox=60-3-m.os.d,y0=m.os.y0;
+      g.push(hit('oster',sb(ox,57,y0+1.2,y0+m.os.h,`fill="url(#${p}iv)" stroke="#5d6369"`)+sb(56,57,y0+4,y0+m.os.h-3,'fill="#2c3035"')+sb(ox+2,ox+6,y0,y0+1.2,'fill="#222"')+sb(51,55,y0,y0+1.2,'fill="#222"'),sb(ox,57,y0,y0+m.os.h)));}
+    g.push(hit('superior',sb(0,60,m.y6,m.y6+1.8,FR)+sb(0,0.6,m.y6,T,`fill="${F.edge}"`)+sb(1,57.5,d.shelfS-1.8,d.shelfS,FR)+sb(58.2,60,m.y6+0.15,T-0.15,FR)+sb(0,60,T-1.8,T,FR),sb(0,60,m.y6,T)));
+    g.push(sb(0,60,m.sb,T,'fill="none" stroke="var(--ink)" stroke-width="1.4" class="ov"'));
+    // movimento
+    g.push(sb(60.4,108.4,m.y1+3,m.y1+5.5,'class="mv"'));
+    if(m.tri)g.push(sb(57,82,m.os.y0+1.5,m.os.y0+3,'class="mv"'));
+    if(s>=1.9){g.push(tx(SX(84),Y(m.y1+5.5)-5,'porta do forno ≈ 48','text-anchor="middle" class="mvt"'))}
+  }
+
+  // ---------- ELETRICA E AR
+  const eb=(x,y,lbl,dash,pos)=>{const z=11;return `<g class="ov">${R(x-z/2,y-z/2,z,z,`class="eb" rx="2"${dash?' stroke-dasharray="2 2"':''}`)}<circle cx="${fl(x-2.2)}" cy="${fl(y)}" r="1.3" fill="var(--elec)"/><circle cx="${fl(x+2.2)}" cy="${fl(y)}" r="1.3" fill="var(--elec)"/>${tx(pos==='l'?x-9:pos==='a'?x:x+9,pos==='a'?y-10:y+4.5,lbl,`class="et"${pos==='l'?' text-anchor="end"':pos==='a'?' text-anchor="middle"':''}`)}</g>`};
+  const heat=(x,y1,y2)=>{const h=y1-y2;return `<path class="air" d="M${fl(x)} ${fl(y1)}q3 ${fl(-h/4)} 0 ${fl(-h/2)}t0 ${fl(-h/2)}"/><path class="air" d="M${fl(x-3)} ${fl(y2+4)}L${fl(x)} ${fl(y2)}L${fl(x+3)} ${fl(y2+4)}"/>`};
+  if(o.elec){
+    g.push(eb(X(m.e)+7,Y(d.t1y),'',1,'a'));
+    g.push(eb(X(60-m.e)-7,Y(d.t1y),'',1,'a'));
+    if(m.tri){g.push(eb(X(m.e)+7,Y(d.t3y),'',1,'a'));
+      if((m.y4-d.osTop)*s>=16)[14,21,28].forEach(x=>g.push(`<g class="ov">${heat(X(x),Y(d.osTop+1.5),Y(m.y4-1.2))}</g>`));}
+    else g.push(eb(X(115),Y(d.t3y),'T3',0,'a'));
+    if(o.side){
+      g.push(`<g class="ov"><path class="air" d="M${fl(SX(66))} ${fl(Y(4))}H${fl(SX(1.3))}V${fl(Y(m.y5+6))}"/><path class="air" d="M${fl(SX(1.3)-3.5)} ${fl(Y(m.y5+6)+5)}L${fl(SX(1.3))} ${fl(Y(m.y5+6))}L${fl(SX(1.3)+3.5)} ${fl(Y(m.y5+6)+5)}"/></g>`);
+      if(m.tri)g.push(`<g class="ov"><path class="air" d="M${fl(SX(30))} ${fl(Y(m.y4-3))}H${fl(SX(68))}"/><path class="air" d="M${fl(SX(68)-5)} ${fl(Y(m.y4-3)-3.5)}L${fl(SX(68))} ${fl(Y(m.y4-3))}L${fl(SX(68)-5)} ${fl(Y(m.y4-3)+3.5)}"/></g>`);
+      g.push(eb(SX(9),Y(d.t1y),'T1 / T2',1,'r'));
+      if(m.tri)g.push(eb(SX(9),Y(d.t3y),'T3',1,'r'));
+    }
+  }
+
+  // ---------- COTAS
+  const vd=(x,a,b,label,cls)=>{const y1=Y(a),y2=Y(b),h=y1-y2,mid=(y1+y2)/2;let t=`<g class="${cls||''}">`+ln(x,y2,x,y1,'class="cl"')+ln(x-3.5,y1+3.5,x+3.5,y1-3.5,'class="cl"')+ln(x-3.5,y2+3.5,x+3.5,y2-3.5,'class="cl"');
+    t+=h>=30?tx(x-5,mid,label,`class="ct" text-anchor="middle" transform="rotate(-90 ${fl(x-5)} ${fl(mid)})"`):tx(x+6,mid+4,label,'class="ct sm"');return t+'</g>'};
+  const hd=(y,x1,x2,label,cls,above)=>{let t=`<g class="${cls||''}">`+ln(x1,y,x2,y,'class="cl"')+ln(x1-3.5,y+3.5,x1+3.5,y-3.5,'class="cl"')+ln(x2-3.5,y+3.5,x2+3.5,y-3.5,'class="cl"');
+    const w=Math.abs(x2-x1);t+=tx((x1+x2)/2,above===false?y+15:y-5,label,`class="ct${w<26?' sm':''}" text-anchor="middle"`);return t+'</g>'};
+  if(o.cotas){
+    const c1=L.fx-(o.compact?20:24),c2=L.fx-(o.compact?46:58);
+    const lv=[0,m.r,m.y2,m.y3,m.y4,m.y5,m.y6,T];
+    lv.forEach(v=>g.push(ln(L.fx-3,Y(v),c2-4,Y(v),'class="ex"')));
+    for(let i=0;i<lv.length-1;i++)g.push(vd(c1,lv[i],lv[i+1],f(lv[i+1]-lv[i])));
+    g.push(vd(c2,0,T,f(T)));
+    g.push(ln(X(0),Y(0)+4,X(0),Y(0)+30,'class="ex"')+ln(X(60),Y(0)+4,X(60),Y(0)+30,'class="ex"'));
+    g.push(hd(Y(0)+26,X(0),X(60),f(60)));
+    if(!m.tri)g.push(ln(X(120),Y(0)+4,X(120),Y(0)+30,'class="ex"')+hd(Y(0)+26,X(60),X(120),f(60)+' bancada'));
+    if(s>=1.8){
+      g.push(vd(X(36),d.mwTop,m.mwNt,f(d.mwT),'fz'));
+      if(m.tri){g.push(vd(X(36),d.osTop,m.y4,f(d.osT),'fz'));g.push(hd(Y(m.os.y0+m.os.h*0.6),X(m.e),X(10),f(d.osS),'fz'))}
+    }
+    if(o.side){
+      g.push(ln(SX(55),Y(0)+4,SX(55),Y(0)+26,'class="ex"')+ln(SX(60),Y(0)+4,SX(60),Y(0)+50,'class="ex"')+ln(SX(0),Y(0)+4,SX(0),Y(0)+50,'class="ex"')+ln(SX(5),Y(0)+4,SX(5),Y(0)+26,'class="ex"'));
+      g.push(hd(Y(0)+22,SX(0),SX(5),f(5)));g.push(hd(Y(0)+22,SX(5),SX(55),f(50)+' entre pés'));g.push(hd(Y(0)+22,SX(55),SX(60),f(5)));
+      g.push(hd(Y(0)+46,SX(0),SX(60),f(60)));
+      if(s>=1.8){g.push(hd(Y(m.mw.y0+18),SX(0.6),SX(60-1-41.9),f(d.mwB),'fz'));
+        if(m.tri)g.push(hd(Y(m.os.y0+18),SX(0.6),SX(60-3-m.os.d),f(d.osB),'fz'))}
+    }
+    [m.r,m.y3,m.y5,m.y6,T].forEach(v=>g.push(tx(L.ax-8,Y(v)+4,'+'+f(v),'class="lv" text-anchor="end"')+ln(L.ax-6,Y(v),L.ax-1,Y(v),'class="ex"')));
+  }
+
+  // ---------- ERGONOMIA
+  if(o.ergo){
+    const x0=L.fx-2,x1=L.LX-8;
+    g.push(`<g class="ov"><rect x="${fl(x0)}" y="${ty(Y(ERG.green))}" width="${fl(x1-x0)}" height="${fl(ERG.green*s)}" fill="var(--ok)" opacity=".06"/><rect x="${fl(x0)}" y="${ty(Y(ERG.H))}" width="${fl(x1-x0)}" height="${fl((ERG.H-ERG.green)*s)}" fill="var(--warn)" opacity=".13"/>`+ln(x0,Y(ERG.green),x1,Y(ERG.green),'stroke="var(--warn)" stroke-width="1.2"')+'</g>');
+    // pessoa
+    const P=(dx,y)=>`${fl(PX(dx))} ${fl(Y(y))}`;
+    let pf=`<path class="pf" d="M${P(-6.5,82)}L${P(6.5,82)}L${P(5,8)}L${P(-3.5,8)}Z"/>`;
+    pf+=`<path class="pf" d="M${P(-3.5,8)}L${P(5,8)}L${P(5.5,0)}L${P(-12.5,0)}Q${P(-13.5,3.5)} ${P(-9,5.2)}Z"/>`;
+    pf+=`<path class="pf" d="M${P(-9.5,127)}Q${P(-12.5,112)} ${P(-11,100)}Q${P(-9.5,90)} ${P(-8,82)}L${P(7,82)}Q${P(9.5,96)} ${P(8.5,108)}Q${P(8,121)} ${P(6.5,128)}Q${P(0,130.5)} ${P(-9.5,127)}Z"/>`;
+    pf+=`<rect class="pf" x="${fl(PX(-3.5))}" y="${fl(Y(135))}" width="${fl(6*s)}" height="${fl(7*s)}"/>`;
+    pf+=`<ellipse class="pf" cx="${fl(PX(-1))}" cy="${fl(Y(144.5))}" rx="${fl(8.5*s)}" ry="${fl(10.5*s)}"/>`;
+    pf+=`<path d="M${P(0,125)}L${P(-1,98)}L${P(-28,98)}" fill="none" stroke="var(--ergo)" stroke-width="${fl(6.6*s)}" stroke-linecap="round" stroke-linejoin="round"/><path d="M${P(0,125)}L${P(-1,98)}L${P(-28,98)}" fill="none" stroke="var(--fig)" stroke-width="${fl(6.6*s-2)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    pf+=`<ellipse class="pf" cx="${fl(PX(-31))}" cy="${fl(Y(98.3))}" rx="${fl(3.6*s)}" ry="${fl(2.6*s)}"/>`;
+    pf+=`<circle cx="${fl(PX(-6.2))}" cy="${fl(Y(144))}" r="${fl(Math.max(1.5,0.9*s))}" fill="var(--ergo)"/>`;
+    const ex=PX(-1),ey=Y(98);pf+=`<path d="M${fl(ex-7)} ${fl(ey)}V${fl(ey-7)}H${fl(ex)}" fill="none" stroke="var(--ergo)" stroke-width="1.2"/>`;
+    g.push(`<g class="ov">${pf}</g>`);
+    // linhas
+    [[ERG.H,'Altura',0],[ERG.eye,'Olhos',0],[ERG.sh,'Ombros ≈',1],[ERG.elbow,'Cotovelo',0]].forEach(([v,nm,es])=>{
+      g.push(ln(L.fx-2,Y(v),L.LX-6,Y(v),`class="eg${es?' es':''}"`));
+      g.push(tx(L.LX,Y(v)+4.5,`${nm} ${f(v)}`,`class="egt${es?' es':''}"`));
+    });
+    // régua
+    const rx=L.LX+L.LW-20,rw=14;
+    const zs=[[0,ERG.green,'var(--ok)','Zona verde até '+f(ERG.green),'Verde'],[ERG.green,ERG.H,'var(--warn)','Alerta','!'],[ERG.H,T,'var(--mut)','Acima da cabeça','Alto']];
+    let rg='';
+    zs.forEach(([a,b,col,lb,sh])=>{const y1=Y(b),h=(b-a)*s;rg+=R(rx,y1,rw,h,`fill="${col}"`);const lab=lb.length*6.6<h-8?lb:(sh.length*7<h-6?sh:'');if(lab){const cy=y1+h/2;rg+=tx(rx+rw/2+4.3,cy,lab,`class="rl" fill="#fff" text-anchor="middle" transform="rotate(-90 ${fl(rx+rw/2+4.3)} ${fl(cy)})"`)}});
+    for(let v=0;v<=T;v+=10)rg+=ln(rx-(v%50?3:6),Y(v),rx,Y(v),'stroke="var(--dim)" stroke-width=".8"');
+    g.push(`<g class="ov">${rg}</g>`);
+    if(m.tri){const wx=X(53.5),wy=Y(d.mwTop+d.mwT/2)+1;g.push(`<g class="ov"><path d="M${fl(wx)} ${fl(wy-8)}L${fl(wx+8)} ${fl(wy+6)}L${fl(wx-8)} ${fl(wy+6)}Z" fill="var(--warn)" stroke="var(--paper)" stroke-width="1"/><text x="${fl(wx)}" y="${fl(wy+4.5)}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">!</text></g>`)}
+  }
+  const bg=`background-size:${fl(10*s)}px ${fl(10*s)}px;background-position:${fl(L.fx)}px ${fl(Y(0))}px`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(L.W)}" height="${Math.round(L.H)}" viewBox="0 0 ${Math.round(L.W)} ${Math.round(L.H)}" style="${bg}" role="img" aria-label="Vista frontal${o.side?' e corte lateral':''} da torre quente com cotas e régua de ergonomia">${g.join('')}</svg>`;
+}
+
+// ---------- estado da tela
+const sheet=$('#sheet'),dw=$('#dw');
+let lastS=2.5;
+function viewOpts(){
+  const avail=sheet.clientWidth-12,m=model();
+  const compact=avail<600;
+  const side=st.side===null?avail>=640:st.side;
+  const o={side,ergo:st.ergo,cotas:st.cotas,elec:st.elec,compact,pre:'m'};
+  let s;
+  if(st.scale==='auto'){const a=lay(0,o,m).W,b=lay(1,o,m).W-a;s=Math.max(1.1,Math.min(3,(avail-a)/b));s=Math.floor(s*20)/20}else s=+st.scale;
+  o.s=s;lastS=s;return o;
+}
+function renderDrawing(){
+  const o=viewOpts();dw.innerHTML=drawing(o);
+  $('#scl-l').textContent=`Escala: 1 cm = ${n1(o.s)} px`;
+  $('#t-side').checked=o.side;
+}
+function setSeg(id,v){document.querySelectorAll(id+' button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(v))))}
+function renderInsp(id){
+  const m=model(),d=der(m),I=info(id,m,d);
+  const rel=checks(m,d).filter(c=>c.ids.includes(id));
+  const lbl={ok:'Aprovado',warn:'Atenção',bad:'Revisar',info:'Nota'};
+  $('#insp').innerHTML=`<h2>${esc(I.t)}</h2><p class="rng">${f(I.a)} a ${f(I.b)} <small>${st.unit} do piso, ${fu(I.b-I.a)} de altura</small></p>
+  <dl>${I.rows.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl>
+  <h3>Observações</h3><p>${esc(I.tx)}</p><h3>Ventilação</h3><p>${esc(I.vent)}</p><h3>Ponto elétrico</h3><p class="el">${esc(I.tom)}</p>
+  ${rel.length?`<h3>Validação</h3>${rel.map(c=>`<p style="margin-top:4px"><b style="color:var(--${c.s==='info'?'mut':c.s})">${lbl[c.s]}:</b> ${esc(c.t)}</p>`).join('')}`:''}
+  ${hoverId&&hoverId!==st.sel?'<p class="pv">Prévia ao passar o mouse; clique para fixar.</p>':''}`;
+}
+function markSel(){
+  dw.querySelectorAll('.hit').forEach(g=>g.classList.toggle('sel',g.dataset.id===st.sel));
+  document.querySelectorAll('#chips button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===st.sel)));
+}
+function render(){
+  const m=model(),d=der(m),C=checks(m,d),E=elec(m);
+  const okN=C.filter(c=>c.s==='ok').length,wN=C.filter(c=>c.s==='warn').length,bN=C.filter(c=>c.s==='bad').length;
+  document.title='Torre Quente Tripla';
+  $('#lede').innerHTML=`60 × 60 × ${esc(f(m.T))} ${st.unit}, ajustada para uma usuária de 1,55 m. <b>${okN} de ${C.length} verificações aprovadas</b>${wN?`, ${wN} pedem atenção`:''}${bN?` e <b style="color:#ff9b93">${bN} precisa${bN>1?'m':''} de revisão</b>`:''}.`;
+  const kMw=['Micro-ondas',`${f(m.mw.y0)}–${f(d.mwTop)}`],kOs=['Air fryer',`${f(m.os.y0)}–${f(d.osTop)}`];
+  const kf=[['Altura total',f(m.T)],['Forno Midea',`${f(m.y1)}–${f(d.ovTop)}`],m.tri?kOs:kMw,m.tri?kMw:kOs,['Usuária',`${f(155)}`]];
+  $('#kf').innerHTML=kf.map(k=>`<div><dt>${k[0]}</dt><dd>${k[1]} <small>${st.unit}</small></dd></div>`).join('');
+  setSeg('#s-unit',st.unit);setSeg('#s-scale',st.scale);setSeg('#s-fecho',st.fecho);setSeg('#s-n3',st.n3);setSeg('#s-volt',st.volt);setSeg('#s-dob',st.dob);
+  document.querySelectorAll('#s-fin button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===st.fin)));
+  $('#t-ergo').checked=st.ergo;$('#t-cotas').checked=st.cotas;$('#t-elec').checked=st.elec;
+  $('#in-pe').value=st.pe;
+  $('#chips').innerHTML=ORDER.map(id=>`<button data-id="${id}" aria-pressed="${id===st.sel}">${esc(id==='nicho3'&&!m.tri?'Nicho 3 (despensa)':LAB[id])}</button>`).join('');
+  renderDrawing();renderInsp(st.sel);
+  const lbl={ok:'Aprovado',warn:'Atenção',bad:'Revisar',info:'Nota'};
+  $('#sum').textContent=`${okN} aprovadas, ${wN} em atenção${bN?`, ${bN} a revisar`:''}, ${C.length-okN-wN-bN} notas.`;
+  $('#checks').innerHTML=C.map(c=>`<li data-id="${c.ids[0]}"><span class="p ${c.s}">${lbl[c.s]}</span><b>${esc(c.t)}</b><span class="x">${esc(c.x)}</span></li>`).join('');
+  $('#cap').innerHTML=`<span><i style="background:color-mix(in srgb,var(--ok) 35%,transparent);border:1px solid var(--ok)"></i>Zona verde: 0 a 120 cm</span><span><i style="background:color-mix(in srgb,var(--warn) 40%,transparent);border:1px solid var(--warn)"></i>Zona amarela: 120 a 155 cm</span><span><i style="border-top:2px dashed var(--ergo);height:0"></i>Olhos 144 e cotovelo 98</span><span><i style="background:var(--paper);border:1.5px solid var(--elec)"></i>Tomadas T1 a T3</span><span><i style="border-top:2px solid var(--ok);height:0"></i>Folgas de ar</span><span>Malha de 10 cm</span>`;
+  $('#alert').innerHTML=m.tri?`<b>Atenção no micro-ondas.</b> Ele fica de ${esc(fu(m.mw.y0))} a ${esc(fu(d.mwTop))}, na zona amarela, com o prato entre o cotovelo e os ombros. Pratos e porções, que são leves, saem com conforto; sopa, água ou leite quentes só em recipiente com alça e sem encher até a borda. A air fryer, mais quente e com cesto, ficou na zona verde, na altura do cotovelo.${d.osT<10?` <b>Folga de topo da air fryer de só ${esc(fu(d.osT))}.</b>`:''}`:'';
+  // quadro
+  const rows=[
+    ['Pés reguláveis','rodape',0,m.sb,'6 pés','recuo '+f(5),'pés ≈ '+f(8.2)+' + base '+f(1.8)+'; regulagem ± '+f(1.5)],
+    ['Base do forno','base',m.sb,m.r,f(m.inner),f(55)+' + recorte '+f(5),'MDF 18 mm + 2 travessas, fundo estrutural'],
+    ['Nicho 1: forno','nicho1',m.y1,m.y2,f(m.inner),f(60)+', fundo aberto','vão livre '+f(60)],
+    ['Prateleira intermediária','pratA',m.y2,m.y3,f(m.inner),f(55)+' + rasgo '+f(5),'fixa, MDF 18 mm'],
+    [m.tri?'Nicho 2: air fryer':'Nicho 2: micro-ondas','nicho2',m.y3,m.y4,f(m.inner),f(60)+', fundo vazado',m.tri?'vão livre '+f(m.n2)+', teto com alumínio, T1 e T2':'vão livre '+f(m.n2)+', T1 e T2'],
+    ['Prateleira de apoio','pratB',m.y4,m.y5,f(m.inner),f(55)+' + rasgo '+f(5),'fixa, MDF 18 mm'],
+    [m.tri?'Nicho 3: micro-ondas':'Nicho 3: despensa','nicho3',m.y5,m.y6,f(m.inner),f(60)+', fundo vazado',m.tri?'vão livre '+f(m.n3)+', T3':'porta de giro + prateleira'],
+    ['Armário superior','superior',m.y6,T(),f(m.inner),f(57),'porta de abrir, dobradiças à '+DOB().lado]
+  ];
+  function T(){return m.T}
+  $('#q-lead').innerHTML=`Cotas em ${st.unit}, níveis medidos do piso. Os vãos livres dos nichos são medidas mínimas entre faces de MDF 18 mm; o armário superior fecha a altura: <b>${esc(fu(m.sup))}</b> ${st.fecho==='240'?`para totalizar ${esc(fu(240))}`:`e a torre fica com ${esc(fu(m.T))}`}.`;
+  $('#tq').innerHTML=`<thead><tr><th>Módulo</th><th class="n">De</th><th class="n">Até</th><th class="n">Altura</th><th class="n">Largura útil</th><th class="n">Prof.</th><th>Execução</th></tr></thead><tbody>${rows.map(r=>{return `<tr data-id="${r[1]}"><td data-l="Módulo">${esc(r[0])}</td><td class="n" data-l="De">${f(r[2])}</td><td class="n" data-l="Até">${f(r[3])}</td><td class="n" data-l="Altura">${f(r[3]-r[2])}</td><td class="n" data-l="Largura útil">${esc(r[4])}</td><td class="n" data-l="Prof.">${esc(r[5])}</td><td data-l="Execução">${esc(r[6])}</td></tr>`}).join('')}</tbody>`;
+  $('#te').innerHTML=`<thead><tr><th>Ponto</th><th>Aparelho</th><th class="n">Corrente</th><th class="n">Disjuntor</th><th class="n">Tomada</th></tr></thead><tbody>${E.map(e=>`<tr><td data-l="Ponto"><b>${e.id}</b></td><td data-l="Aparelho">${esc(e.ap)}<br><span style="color:var(--mut);font-size:13px">${esc(e.pos)}</span></td><td class="n" data-l="Corrente">${e.I===null?'ver etiqueta':n1(e.I)+' A'}</td><td class="n" data-l="Disjuntor">${e.dj} A</td><td class="n" data-l="Tomada">${e.tom}</td></tr>`).join('')}</tbody>`;
+  renderPedido();
+  save();
+}
+
+// ---------- ficha técnica
+const mm=v=>Math.round(v*10);
+const DOB=()=>st.dob==='e'?{lado:'esquerda',pux:'direita',abre:'da direita para a esquerda'}:{lado:'direita',pux:'esquerda',abre:'da esquerda para a direita'};
+function pecas(m){
+  const L=[],add=(p,q,a,b,e,fi,o)=>L.push({p,q,a,b,e,fi,o});
+  add('Lateral',2,mm(m.T-m.sb),600,18,'frente','altura da caixa; pés fixados por baixo');
+  add('Base do forno',1,564,550,18,'frente',`face superior a ${mm(m.r)} do piso; 50 livres atrás`);
+  add('Travessa da base',2,564,50,18,'',`sob a base, na frente e no fundo`);
+  add('Prateleira intermediária',1,564,550,18,'frente',`face inferior a ${mm(m.y2)}; 50 livres atrás`);
+  add('Prateleira de apoio',1,564,550,18,'frente',`face inferior a ${mm(m.y4)}; 50 livres atrás${m.tri?'; alumínio por baixo':''}`);
+  add('Fundo do armário superior',1,564,594,18,'frente',`face inferior a ${mm(m.y6)}`);
+  add('Tampo',1,564,594,18,'frente',`entre as laterais, topo a ${mm(m.T)}`);
+  add('Costas do armário superior',1,564,mm(m.sup-3.6),6,'','MDF 6 mm entre laterais, fundo e tampo');
+  add('Prateleira interna do armário',1,562,550,18,'frente','regulável em pinos');
+  add('Porta do armário superior',1,560,mm(m.sup-4),18,'4 lados',`embutida, folga de 2 em volta; dobradiças à ${DOB().lado}, abre ${DOB().abre}`);
+  add('Travessa de fixação na parede',1,564,100,18,'','no fundo do nicho 3, sob o armário superior');
+  if(!m.tri){add('Porta da despensa',1,560,mm(m.n3-0.4),18,'4 lados','embutida, dobradiças à esquerda');add('Prateleira da despensa',1,562,520,18,'frente','regulável em pinos')}
+  return L;
+}
+function totais(m){
+  const P=pecas(m);let fita=0,a18=0;
+  P.forEach(x=>{fita+=x.q*(x.fi==='frente'?x.a:x.fi==='4 lados'?2*(x.a+x.b):0);if(x.e===18)a18+=x.q*x.a*x.b/1e6});
+  return {fita:Math.ceil(fita/1000*1.1),a18,ch:Math.ceil(a18*1.25/(2.75*1.85))};
+}
+function tomadas(m){
+  const d=der(m),r=[['T1','lateral esquerda do nicho 2',d.t1y]];
+  r.push(['T2','lateral direita do nicho 2',d.t1y]);
+  if(m.tri)r.push(['T3','lateral esquerda do nicho 3',d.t3y]);
+  return r;
+}
+function ferr(m){
+  const kg=0.56*(m.sup-4)/100*0.018*750,t=totais(m),tri=m.tri,nt=tomadas(m).length;
+  const r=[['Pés reguláveis','6','≈ 80 mm, regulagem de 70 a 100 mm, 50 kg ou mais cada; 4 nos cantos e 2 no meio, sob o forno, recuados 50 mm da frente'],
+    ['Dobradiça de caneco 35 mm com amortecedor, 110°','2',`porta do armário superior (≈ ${n1(kg)} kg), na lateral ${DOB().lado}, a ~100 mm do topo e da base da porta`]];
+  if(!tri)r.push(['Dobradiça de caneco 35 mm com amortecedor','2','porta da despensa']);
+  r.push(['Puxador',tri?'1':'2',`vertical, no lado ${DOB().pux} da porta do armário superior, parte de baixo`+(tri?'':'; lateral da porta da despensa')],
+    ['Suporte de prateleira (pino)',tri?'4':'8','prateleiras reguláveis'],
+    ['Cantoneira anti-tombamento','2','com parafuso e bucha 8 mm na parede'],
+    ['Caixa 4×2 para tomada em móvel',String(nt),'recortes nas laterais internas, ver posições abaixo']);
+  if(tri)r.push(['Chapa de alumínio 0,5 mm ou laminado resistente ao calor','1','564 × 550 mm, sob a prateleira de apoio (teto da air fryer)']);
+  r.push(['Fita de borda PVC 22 mm',`${t.fita} m`,'na cor do MDF; 1 mm nas peças, 2 mm nas portas se preferir'],
+    ['MDF 18 mm',`≈ ${t.ch} chapas`,`${n1(t.a18)} m² de peças; confirmar no plano de corte`],
+    ['MDF 6 mm','1 chapa ou retalho','costas do armário superior']);
+  if(tri)r.push(['Opcional: corrediça telescópica 450 mm + bandeja','1 par','para puxar a air fryer; nesse caso o nicho 2 passa a 485 mm para manter 100 mm livres no topo']);
+  return r;
+}
+function reqs(m){
+  const d=der(m);
+  return [`Medidas externas: 600 de largura × 600 de profundidade × ${mm(m.T)} de altura (mm), MDF 18 mm na cor ${FIN[st.fin].n}.`,
+    `Vãos livres mínimos (altura × largura): nicho 1, forno: 600 × 564; nicho 2, ${m.tri?'air fryer':'micro-ondas'}: ${mm(m.n2)} × 564; nicho 3, ${m.tri?'micro-ondas':'despensa'}: ${mm(m.n3)} × 564. Não reduzir.`,
+    'Nichos dos aparelhos sem fundo, com 50 mm livres atrás da base e das duas prateleiras: é a ventilação do forno.',
+    'Sem rodapé: torre sobre 6 pés reguláveis, vão aberto por baixo.',
+    ...(m.tri?['Teto do nicho da air fryer (face de baixo da prateleira de apoio) revestido com alumínio ou laminado resistente ao calor.']:[]),
+    `Recortes para caixa 4×2 nas laterais internas, com centro a 80 mm do fundo: ${tomadas(m).map(t=>`${t[0]} na ${t[1]}, a ${mm(t[2])} do piso`).join('; ')}.`,
+    'Torre fixada na parede pela travessa traseira e por 2 cantoneiras anti-tombamento.',
+    'Fita de borda em todas as faces aparentes; portas embutidas com folga de 2 mm.'];
+}
+function conf(m){
+  const d=der(m);
+  return ['Medida de nicho no manual de instalação do forno Midea 80 L: o vão de 564 mm recebe corpo de até 560 mm. Se o manual pedir mais, usar laterais de 15 mm.',
+    `Pé-direito do local: para erguer a torre montada são precisos ${mm(Math.ceil(d.diag+1))} mm; abaixo disso, montar em pé no local ou fazer em dois corpos.`,
+    'Prumo da parede e nível do piso (os pés compensam até cerca de 15 mm).',
+    'Posição das tomadas e passagem dos cabos, junto com o eletricista, antes de recortar as laterais.',
+    ...(m.tri?['Se vai ter bandeja corrediça para a air fryer (muda a altura do nicho 2).']:[]),
+    `Se houver parede ou geladeira colada no lado ${DOB().lado} da torre: a porta do armário superior precisa abrir pelo menos 90° sem bater (dobradiça de 110°).`,
+    'Código da cor do MDF na cartela do fornecedor.'];
+}
+const ORC=['Valor total com material e mão de obra','Marca e linha do MDF e das ferragens','Prazo de entrega','Frete, montagem e instalação no local','Visita para medição antes do corte','Garantia e condições de pagamento'];
+function msgText(m){
+  const P=st.ped,d=der(m);
+  const ap=m.tri?`3 aparelhos: forno de embutir Midea 80 L (nicho de 600 mm), forno/air fryer Oster OFOR250 (nicho de ${mm(m.n2)} mm) e micro-ondas Electrolux ME36B (nicho de ${mm(m.n3)} mm)`:`forno de embutir Midea 80 L (nicho de 600 mm) e micro-ondas Electrolux ME36B (nicho de ${mm(m.n2)} mm), com despensa de porta acima`;
+  return `Olá${P.mar?', '+P.mar:''}! Tudo bem?
+
+Gostaria de um orçamento para produzir uma torre quente sob medida em MDF 18 mm ${FIN[st.fin].n}, com 60 × 60 × ${n1(m.T)} cm, sem rodapé, sobre 6 pés reguláveis. Ela recebe ${ap}, e tem armário superior com porta de abrir (dobradiças à ${DOB().lado}, abrindo ${DOB().abre}).
+
+Envio em anexo o pedido com desenho cotado, níveis, lista de peças, ferragens e os pontos que precisam ser respeitados (vãos livres mínimos, ventilação dos nichos e recortes das tomadas).
+
+No orçamento, por favor informe: valor com material e mão de obra, marca do MDF e das ferragens, prazo, se inclui frete e instalação, e se você faz a medição no local antes de cortar.
+${P.end?`\nEndereço da obra: ${P.end}`:''}${P.prazo?`\nPrazo desejado: ${P.prazo}`:''}${P.cli?`\n\n${P.cli}${P.tel?' · '+P.tel:''}`:''}
+
+Obrigado!`;
+}
+function renderPedido(){
+  const m=model(),P=pecas(m),t=totais(m);
+  ['cli','tel','end','prazo','mar'].forEach(k=>{const el=$('#p-'+k);if(el&&document.activeElement!==el)el.value=st.ped[k]||''});
+  $('#tp').innerHTML=`<thead><tr><th>Peça</th><th class="n">Qtd</th><th class="n">Compr.</th><th class="n">Larg.</th><th class="n">Esp.</th><th>Fita</th><th>Observação</th></tr></thead><tbody>${P.map(x=>`<tr><td data-l="Peça">${esc(x.p)}</td><td class="n" data-l="Qtd">${x.q}</td><td class="n" data-l="Compr.">${x.a}</td><td class="n" data-l="Larg.">${x.b}</td><td class="n" data-l="Esp.">${x.e}</td><td data-l="Fita">${esc(x.fi||'')}</td><td data-l="Observação">${esc(x.o)}</td></tr>`).join('')}</tbody>`;
+  $('#tp-tot').textContent=`Medidas em mm, para base, prateleiras e tampo entre as laterais e portas embutidas. ${n1(t.a18)} m² de MDF 18 mm. O marceneiro pode adaptar ao sistema construtivo dele, desde que mantenha os vãos livres.`;
+  $('#tf').innerHTML=`<thead><tr><th>Item</th><th class="n">Qtd</th><th>Especificação</th></tr></thead><tbody>${ferr(m).map(r=>`<tr><td data-l="Item">${esc(r[0])}</td><td class="n" data-l="Qtd">${esc(r[1])}</td><td data-l="Especificação">${esc(r[2])}</td></tr>`).join('')}</tbody>`;
+  $('#rq').innerHTML=reqs(m).map(x=>`<li>${esc(x)}</li>`).join('');
+  $('#cf').innerHTML=conf(m).map(x=>`<li>${esc(x)}</li>`).join('');
+  $('#oc').innerHTML=ORC.map(x=>`<li>${esc(x)}</li>`).join('');
+  $('#msg').value=msgText(m);
+}
+function fichaHTML(){
+  const m=model(),d=der(m),E=elec(m),P=st.ped;
+  const svg=drawing({s:1.6,side:true,ergo:true,cotas:true,elec:true,compact:false,pre:'p'});
+  const today=new Date().toLocaleDateString('pt-BR');
+  const apRows=[[m.y1,`<tr><td>Forno elétrico de embutir Midea 80 L</td><td class="n">595 × 595 × 575</td><td class="n">${mm(m.y1)}–${mm(d.ovTop)}</td><td>nicho 1, corpo de 560 mm, fundo aberto</td></tr>`],
+    [m.mw.y0,`<tr><td>Micro-ondas Electrolux ME36B, 1.600 W, 15,2 kg</td><td class="n">520 × 325 × 419</td><td class="n">${mm(m.mw.y0)}–${mm(d.mwTop)}</td><td>${m.tri?'nicho 3':'nicho 2'}, de bancada, frente a 10 mm da face</td></tr>`],
+    [m.tri?m.os.y0:999,`<tr><td>Forno / air fryer Oster OFOR250, 1.700 W, 8 kg</td><td class="n">400 × 365 × 375</td><td class="n">${m.tri?`${mm(m.os.y0)}–${mm(d.osTop)}`:'bancada'}</td><td>${m.tri?'nicho 2, 100 mm livres no topo, frente a 30 mm da face':'fora da torre'}</td></tr>`]].sort((a,b)=>a[0]-b[0]).map(r=>r[1]).join('');
+  const li=a=>a.map(x=>`<li>${esc(x)}</li>`).join('');
+  return `<div class="fbar noprint"><button class="btn" id="f-print">Imprimir / salvar PDF</button><button class="btn ghost" id="f-copy">Copiar mensagem</button><button class="btn ghost" id="f-back">Voltar ao projeto</button><p id="f-msg">Se a janela de impressão não abrir aqui, abra a página em uma aba própria e use Ctrl+P (no celular, Compartilhar → Imprimir) para salvar em PDF.</p></div>
+  <div class="pg">
+   <h1>Pedido de orçamento e produção: torre quente sob medida</h1>
+   <div class="tb">
+    <div><label>Cliente</label>${esc(P.cli||' ')}</div><div><label>Contato</label>${esc(P.tel||' ')}</div><div><label>Data</label>${esc(today)}</div><div><label>Prazo desejado</label>${esc(P.prazo||' ')}</div>
+   </div>
+   <div class="tb" style="margin-top:-15px">
+    <div><label>Endereço da obra</label>${esc(P.end||' ')}</div><div><label>Marceneiro</label>${esc(P.mar||' ')}</div><div><label>Acabamento</label>MDF 18 mm ${esc(FIN[st.fin].n)}</div><div><label>Aparelhos</label>forno, air fryer e micro-ondas</div>
+   </div>
+   <p style="font-size:13px;margin:0 0 8px">Torre de 600 × 600 × ${mm(m.T)} mm sobre 6 pés reguláveis, sem rodapé, com ${m.tri?'forno de embutir, air fryer e micro-ondas':'forno de embutir e micro-ondas'} em nichos abertos e armário superior com porta de abrir, dobradiças à ${DOB().lado}. Ergonomia validada para usuária de 1,55 m.</p>
+   <div class="fsvg">${svg}</div>
+   <p style="font-size:12px;color:#555;margin:6px 0 0">Desenho sem escala de impressão: vale o que está cotado (${st.unit}). Linhas azuis: referência de ergonomia, não fazem parte do móvel.</p>
+   <h2 class="brk">Níveis medidos do piso</h2>${$('#tq').outerHTML.replace('id="tq"','')}
+   <h2>Lista de peças (mm)</h2>${$('#tp').outerHTML.replace('id="tp"','')}
+   <p style="font-size:12px;color:#555;margin:4px 0 0">${esc($('#tp-tot').textContent)}</p>
+   <h2>Ferragens e materiais</h2>${$('#tf').outerHTML.replace('id="tf"','')}
+   <h2>Aparelhos (L × A × P, mm)</h2>
+   <table><thead><tr><th>Aparelho</th><th class="n">Medidas</th><th class="n">Do piso</th><th>Posição</th></tr></thead><tbody>${apRows}</tbody></table>
+   <h2>Pontos elétricos (${st.volt} V, a cargo do eletricista)</h2>${$('#te').outerHTML.replace('id="te"','')}
+   <h2>O marceneiro precisa respeitar</h2><ul class="notes">${li(reqs(m))}</ul>
+   <h2>Confirmar antes de cortar</h2><ul class="notes">${li(conf(m))}</ul>
+   <h2>Peço no orçamento</h2><ul class="notes">${li(ORC)}</ul>
+   <div class="sig"><div>Cliente${P.cli?': '+esc(P.cli):''}</div><div>Marceneiro${P.mar?': '+esc(P.mar):''}</div></div>
+  </div>`;
+}
+function specText(){return msgText(model())}
+async function copyMsg(el){try{await navigator.clipboard.writeText(msgText(model()));el.textContent='Mensagem copiada. Cole no WhatsApp e anexe o PDF do pedido.'}catch(e){el.textContent='Não foi possível copiar aqui: selecione o texto da caixa e copie.'}}
+function buildFicha(){const prev=st.unit;st.unit='mm';render();const h=fichaHTML();st.unit=prev;render();return h}
+function openFicha(){
+  const fc=$('#ficha');fc.innerHTML=buildFicha();document.body.classList.add('printing');window.scrollTo(0,0);
+  $('#f-back').onclick=()=>{document.body.classList.remove('printing')};
+  $('#f-print').onclick=()=>{try{window.print()}catch(e){$('#f-msg').textContent='A impressão foi bloqueada nesta janela: abra a página em uma aba própria e use Ctrl+P.'}};
+  $('#f-copy').onclick=()=>copyMsg($('#f-msg'));
+}
+window.addEventListener('beforeprint',()=>{if(!document.body.classList.contains('printing')){$('#ficha').innerHTML=buildFicha()}});
+
+// ---------- eventos
+$('#s-fin').innerHTML=Object.entries(FIN).map(([k,v])=>`<button class="sw" data-f="${k}"><i style="background:${v.wood?`repeating-linear-gradient(90deg,${v.front} 0 4px,${v.carc} 4px 6px,${v.front} 6px 9px,${v.edge} 9px 10px)`:v.front}"></i>${v.n}</button>`).join('');
+$('#s-fin').addEventListener('click',e=>{const b=e.target.closest('button');if(b){st.fin=b.dataset.f;render()}});
+const segs={'#s-unit':'unit','#s-scale':'scale','#s-fecho':'fecho','#s-n3':'n3','#s-volt':'volt','#s-dob':'dob'};
+Object.entries(segs).forEach(([id,k])=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st[k]=b.dataset.v;if(k==='lay'&&st.sel==='oster'&&b.dataset.v==='dup')st.sel='oster';render()}));
+$('#t-ergo').onchange=e=>{st.ergo=e.target.checked;render()};
+$('#t-cotas').onchange=e=>{st.cotas=e.target.checked;render()};
+$('#t-elec').onchange=e=>{st.elec=e.target.checked;render()};
+$('#t-side').onchange=e=>{st.side=e.target.checked;render()};
+$('#in-pe').onchange=e=>{st.pe=Math.max(200,Math.min(400,+e.target.value||260));render()};
+$('#b-print').onclick=openFicha;
+$('#b-print2').onclick=openFicha;
+$('#b-msg').onclick=()=>copyMsg($('#msg-st'));
+['cli','tel','end','prazo','mar'].forEach(k=>{$('#p-'+k).addEventListener('input',e=>{st.ped[k]=e.target.value;$('#msg').value=msgText(model());save()})});
+const pick=id=>{if(!id||!LAB[id])return;st.sel=id;hoverId=null;markSel();renderInsp(id);save()};
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('button');if(b)pick(b.dataset.id)});
+$('#checks').addEventListener('click',e=>{const li=e.target.closest('li');if(li){pick(li.dataset.id);if(innerWidth<900)$('#insp').scrollIntoView({behavior:'smooth',block:'start'})}});
+$('#tq').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(tr){pick(tr.dataset.id);$('#sheet').scrollIntoView({behavior:'smooth',block:'start'})}});
+dw.addEventListener('click',e=>{const g=e.target.closest('.hit');if(g)pick(g.dataset.id)});
+dw.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('.hit');if(g){e.preventDefault();pick(g.dataset.id)}}});
+dw.addEventListener('mouseover',e=>{const g=e.target.closest('.hit');if(g&&g.dataset.id!==hoverId){hoverId=g.dataset.id;renderInsp(hoverId)}});
+dw.addEventListener('mouseleave',()=>{if(hoverId){hoverId=null;renderInsp(st.sel)}});
+let rw=0;const ro=new ResizeObserver(()=>{const w=sheet.clientWidth;if(Math.abs(w-rw)>2){rw=w;renderDrawing()}});ro.observe(sheet);
+render();
+}
+</script>
+</body>
+</html>
